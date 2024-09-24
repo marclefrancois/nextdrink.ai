@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  nextdrink-ai-app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nextdrink-ai-db
+    environment:
+      - DATABASE_URL=postgres://user:password@nextdrink-ai-db:5432/nextdrinkdb
+
+  nextdrink-ai-db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=nextdrinkdb
+
+volumes:
+  postgres_data:
+
+
