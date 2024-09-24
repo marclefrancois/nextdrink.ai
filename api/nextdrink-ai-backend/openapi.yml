@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  title: NextDrink.ai API
+  version: 1.0.0
+  description: API pour l'application de recommandation de boissons NextDrink.ai
+
+servers:
+  - url: http://localhost:3000/api
+
+paths:
+  /register:
+    post:
+      summary: Inscription d'un nouvel utilisateur
+      tags:
+        - Authentification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        "201":
+          description: Utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Données d'entrée invalides
+
+  /login:
+    post:
+      summary: Connexion d'un utilisateur
+      tags:
+        - Authentification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        "200":
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "400":
+          description: Identifiants invalides
+
+  /drinks:
+    get:
+      summary: Obtenir la liste de toutes les boissons
+      tags:
+        - Boissons
+      responses:
+        "200":
+          description: Liste des boissons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drink"
+    post:
+      summary: Ajouter une nouvelle boisson
+      tags:
+        - Boissons
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DrinkInput"
+      responses:
+        "201":
+          description: Boisson créée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drink"
+        "401":
+          description: Non autorisé
+
+  /drinks/{id}:
+    get:
+      summary: Obtenir les détails d'une boisson spécifique
+      tags:
+        - Boissons
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détails de la boisson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drink"
+        "404":
+          description: Boisson non trouvée
+    put:
+      summary: Mettre à jour une boisson existante
+      tags:
+        - Boissons
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DrinkInput"
+      responses:
+        "200":
+          description: Boisson mise à jour avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drink"
+        "401":
+          description: Non autorisé
+        "404":
+          description: Boisson non trouvée
+    delete:
+      summary: Supprimer une boisson
+      tags:
+        - Boissons
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Boisson supprimée avec succès
+        "401":
+          description: Non autorisé
+        "404":
+          description: Boisson non trouvée
+
+  /consumption:
+    post:
+      summary: Ajouter une boisson à l'historique de consommation
+      tags:
+        - Consommation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                drinkId:
+                  type: integer
+      responses:
+        "201":
+          description: Consommation enregistrée avec succès
+        "401":
+          description: Non autorisé
+    get:
+      summary: Obtenir l'historique de consommation de l'utilisateur
+      tags:
+        - Consommation
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Historique de consommation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConsumptionHistory"
+        "401":
+          description: Non autorisé
+
+  /recommend:
+    post:
+      summary: Obtenir des recommandations de boissons personnalisées
+      tags:
+        - Recommandations
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecommendationPreferences"
+      responses:
+        "200":
+          description: Recommandations de boissons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drink"
+        "401":
+          description: Non autorisé
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    UserLogin:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+
+    DrinkInput:
+      type: object
+      required:
+        - name
+        - type
+        - style
+        - ingredients
+        - alcohol_content
+        - category
+        - drunkenness_level
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [alcoholic, non_alcoholic, half_half]
+        style:
+          type: string
+        ingredients:
+          type: array
+          items:
+            type: string
+        alcohol_content:
+          type: number
+          format: float
+        category:
+          type: string
+          enum: [talker, dancer, both]
+        drunkenness_level:
+          type: string
+          enum: [sober, tipsy, drunk]
+
+    Drink:
+      allOf:
+        - $ref: "#/components/schemas/DrinkInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    ConsumptionHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        drink_id:
+          type: integer
+        consumed_at:
+          type: string
+          format: date-time
+        drink_name:
+          type: string
+
+    RecommendationPreferences:
+      type: object
+      properties:
+        drinkType:
+          type: string
+          enum: [alcoholic, non_alcoholic, half_half]
+        preferredStyle:
+          type: string
+        participantType:
+          type: string
+          enum: [talker, dancer]
+        desiredDrunkennessLevel:
+          type: string
+          enum: [sober, tipsy, drunk]
