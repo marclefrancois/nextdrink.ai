@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "NextDrink.ai",
-    "slug": "NextDrink.ai",
+    "slug": "NextDrinkAi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "NextDrinkAi",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -17,14 +17,21 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Cette application utilise la caméra pour permettre aux utilisateurs de prendre une photo de profil.",
         "NSPhotoLibraryUsageDescription": "Cette application accède à la galerie photo pour permettre aux utilisateurs de choisir une photo de profil."
-      }
+      },
+      "bundleIdentifier": "com.marclefrancois.NextDrinkAi"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.marclefrancois.NextDrinkAi"
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +45,7 @@
         "expo-image-picker",
         {
           "photosPermission": "L'application nécessite l'accès à vos photos pour votre profil.",
-          "cameraPermission": "L'application nécessite l'accès à votre caméra pour prendre une photo de profil."
+          "cameraPermission": "L'application nécessite l'accès à votre caméra pour prendre des photos."
         }
       ]
     ],

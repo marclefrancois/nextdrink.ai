@@ -1,23 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform, useColorScheme, Alert } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as SecureStore from 'expo-secure-store';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Onboarding() {
   const [name, setName] = useState('');
   const [image, setImage] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    console.log('Onboarding component mounted');
+    (async () => {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission nécessaire', 'L\'accès à la caméra est nécessaire pour prendre une photo.');
+      }
+    })();
   }, []);
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission refusée', 'L\'accès à la caméra est nécessaire pour prendre une photo.');
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
+      cameraType: ImagePicker.CameraType.front,
     });
 
     if (!result.canceled) {
@@ -38,24 +52,25 @@ export default function Onboarding() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+      style={[styles.container, colorScheme === 'dark' && styles.darkContainer]}
     >
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Bienvenue sur NextDrink.ai</Text>
+          <Text style={[styles.title, colorScheme === 'dark' && styles.darkText]}>Bienvenue sur NextDrink.ai</Text>
         </View>
-        <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage}>
+        <TouchableOpacity style={styles.imagePlaceholder} onPress={takePhoto}>
           {image ? (
             <Image source={{ uri: image }} style={styles.image} />
           ) : (
             <View style={styles.placeholderContent}>
-              <Text style={styles.placeholderText}>Choisir une photo</Text>
+              <Text style={styles.placeholderText}>Prendre une photo</Text>
             </View>
           )}
         </TouchableOpacity>
         <TextInput
-          style={styles.input}
+          style={[styles.input, colorScheme === 'dark' && styles.darkInput]}
           placeholder="Entrez votre nom"
+          placeholderTextColor={colorScheme === 'dark' ? '#a0a0a0' : 'gray'}
           value={name}
           onChangeText={setName}
         />
@@ -135,5 +150,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingBottom: 20,
+  },
+  darkContainer: {
+    backgroundColor: '#121212',
+  },
+  darkText: {
+    color: 'white',
+  },
+  darkInput: {
+    color: 'white',
+    borderColor: '#a0a0a0',
   },
 });

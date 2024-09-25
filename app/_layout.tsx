@@ -62,6 +62,8 @@ export default function RootLayout() {
     </View>
   );
 
+  console.log("Rendering final. isOnboardingComplete:", isOnboardingComplete);
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
